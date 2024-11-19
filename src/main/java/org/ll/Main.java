@@ -1,30 +1,57 @@
 package org.ll;
 
-import java.util.Scanner;
+import java.util.*;
 
-public class Main {
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+class Quote {
+    private final int id;         // 문장 번호
+    private String wiseSaying;  // 문장
+    private String author;
 
-        System.out.println("== 명언 앱 ==");
+    public Quote(int id, String wiseSaying, String author) {
+        this.id = id;
+        this.wiseSaying = wiseSaying;
+        this.author = author;
+    }
 
-        while (true) {
-            String command = scanner.nextLine();
-            String wiseSaying = "";
-            String writer = "";
-            System.out.print("명령 ) ");
+    public int getId() {
+        return id;
+    }
 
-            switch (command){
-                case "종료":
-                    return;
-                case "등록":
-                    System.out.print("명언 :");
-                    wiseSaying = scanner.nextLine();
-                    System.out.print("작가 :");
-                    writer = scanner.nextLine();
-                    break;
-            }
-        }
+    public void setWriter(String author) {
+        this.author = author;
+    }
 
+    public String getWriter() {
+        return author;
+    }
+
+    public void setWiseSaying(String wiseSaying) {
+        this.wiseSaying = wiseSaying;
+    }
+
+    public String getWiseSaying() {
+        return wiseSaying;
+    }
+
+    @Override
+    public String toString() {
+        return id + " / " + author + " / " + wiseSaying;
     }
 }
+
+public class Main {
+
+    public static void main(String[] args) {
+        App app = new App();
+        app.run();
+    }
+}
+
+class App {
+    public void run(){
+        System.out.println("== 명언 앱 ==");
+
+        System.out.print("명령) ");
+    }
+}
+
