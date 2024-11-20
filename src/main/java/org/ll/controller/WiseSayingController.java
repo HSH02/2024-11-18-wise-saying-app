@@ -1,19 +1,20 @@
 package org.ll.controller;
 
-import org.ll.entity.Quote;
-import org.ll.service.QuoteService;
+import org.ll.model.WiseSaying;
+import org.ll.service.WiseSayingService;
 
 import java.util.Scanner;
 
-public class QuoteController {
-    private QuoteService quoteService;
+public class WiseSayingController {
+    private WiseSayingService wiseSayingService;
 
-    public QuoteController(QuoteService quoteService) {
-        this.quoteService = quoteService;
+    public WiseSayingController(WiseSayingService wiseSayingService) {
+        this.wiseSayingService = wiseSayingService;
     }
 
     public void run() {
         final Scanner scanner = new Scanner(System.in);
+        start();
 
         while (true) {
             System.out.print("명령 ) ");
@@ -38,6 +39,11 @@ public class QuoteController {
         scanner.close(); // 반복문 끝나고 호출
     } // end of run
 
+    private void start(){
+        String content = wiseSayingService.start();
+        System.out.println(content);
+    }
+
     // 명언 등록
     private void addQuote(Scanner scanner){
         System.out.print("명언 : ");
@@ -46,15 +52,15 @@ public class QuoteController {
         System.out.print("작가 : ");
         String author = scanner.nextLine();
 
-        quoteService.addQuote(wiseSaying, author);
+        wiseSayingService.addWiseSaying(wiseSaying, author);
     }
 
     // 명언 목록 출력
     private void listQuotes () {
         System.out.println("번호 / 작가 / 명언");
         System.out.println("----------------------");
-        for (Quote quote : quoteService.getAllQuotes()) {
-            System.out.println(quote.toString());
+        for (WiseSaying wiseSaying : wiseSayingService.getAllWiseSaying()) {
+            System.out.println(wiseSaying.toString());
         }
     }
 
@@ -62,7 +68,7 @@ public class QuoteController {
     private void removeQuote(String command){
         try {
             int id = Integer.parseInt(command.split("=")[1]); // ID 추출
-            quoteService.removeQuote(id); // 삭제 여부
+            wiseSayingService.removeItemByTitle(id); // 삭제 여부
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         } catch (Exception e) {
@@ -74,25 +80,23 @@ public class QuoteController {
     private void updateQuote(String command, Scanner scanner){
         try {
             int id = Integer.parseInt(command.split("=")[1]); // ID 추출
-            Quote quote = quoteService.getQuoteById(id);
+            WiseSaying wiseSaying = wiseSayingService.getQuoteById(id);
 
-            System.out.println("명언(기존): " + quote.getWiseSaying());
+            System.out.println("명언(기존): " + wiseSaying.getWiseSaying());
             System.out.print("명언 : ");
             String newWiseSaying = scanner.nextLine();
 
-            System.out.println("작가(기존): " + quote.getAuthor());
+            System.out.println("작가(기존): " + wiseSaying.getAuthor());
             System.out.print("작가: ");
             String newAuthor = scanner.nextLine();
 
-            quoteService.update(id , newWiseSaying, newAuthor);
+            wiseSayingService.update(id , newWiseSaying, newAuthor);
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         } catch (Exception e) {
             System.out.println("예상치 못한 오류 발생");
         }
     }
-
-
 
 
 } // end of Controller
