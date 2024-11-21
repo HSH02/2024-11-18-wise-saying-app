@@ -22,24 +22,19 @@ public class WiseSayingService {
         lastId = wiseSayingRepository.readLastId(); // 마지막 ID 파일 읽기
     }
 
-    // 프로그램 시작 메시지 반환
-    public String getDisplayStartMessage(){
-        return wiseSayingRepository.isFileDirectoryExists() ? "프로그램 다시 시작..." : "== 명언 앱 ==";
-    }
-
     // 명언 추가
-    public int addWiseSaying(String wiseSaying, String author) throws IOException {
+    public int add(String wiseSaying, String author) throws Exception {
         WiseSaying newWiseSaying = new WiseSaying(++lastId, wiseSaying, author);
 
-        wiseSayingRepository.saveWiseSaying(newWiseSaying, lastId); // 파일 저장
+        wiseSayingRepository.add(newWiseSaying, lastId); // 파일 저장
         wiseSayingRepository.saveLastId(lastId); // 마지막 ID 파일 업데이트
 
         return lastId;
     }
 
     // ID로 명언 반환
-    public WiseSaying getWiseSayingById(int id) throws IOException{
-        WiseSaying wiseSaying = wiseSayingRepository.getWiseSayingById(id);
+    public WiseSaying findByID(int id) throws Exception{
+        WiseSaying wiseSaying = wiseSayingRepository.findById(id);
         if(wiseSaying == null) {
             throw new IllegalArgumentException(id + "번 명언은 존재하지 않습니다.");
         }
@@ -47,24 +42,30 @@ public class WiseSayingService {
     }
 
     // 모든 명언 목록 반환
-    public List<WiseSaying> getAllWiseSayings() throws IOException {
-        return wiseSayingRepository.getAllWiseSayings();
+    public List<WiseSaying> findAll(){
+        return wiseSayingRepository.findAll();
     }
 
     // ID로 명언 삭제
-    public String removeWiseSayingById(int id) throws IOException {
-        if (!wiseSayingRepository.removeItemById(id))  {
+    public String deleteById(int id) throws Exception {
+        if (!wiseSayingRepository.deleteById(id))  {
             return id + "번 명언은 존재하지 않습니다.";
         }
         return id + "번 명언이 삭제되었습니다.";
     }
 
     // ID로 명언 수정
-    public String updateWiseSayingById(int id, String newWiseSaying, String newAuthor) throws IOException {
-        if (!wiseSayingRepository.updateWiseSaying(id, newWiseSaying, newAuthor)) {
+    public String updateById(int id, String newWiseSaying, String newAuthor) throws Exception {
+        if (!wiseSayingRepository.updateById(id, newWiseSaying, newAuthor)) {
             return id + "번 명언은 존재하지 않습니다.";
         }
         return id + "번 명언이 수정되었습니다.";
+    }
+
+    // 모든 json을 합친 data.json 생성
+    public String build() throws Exception{
+        boolean isSuccess = wiseSayingRepository.build();
+        return isSuccess ? "data.json 파일의 내용이 갱신되었습니다." : "오류 발생";
     }
 
 }
