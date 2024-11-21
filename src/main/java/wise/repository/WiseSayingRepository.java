@@ -1,6 +1,6 @@
-package org.ll.repository;
+package wise.repository;
 
-import org.ll.model.WiseSaying;
+import wise.model.WiseSaying;
 
 import java.io.*;
 import java.nio.file.*;
@@ -11,14 +11,25 @@ import java.util.*;
  * 스캐너 사용금지, 출력 금지
  */
 public class WiseSayingRepository {
-    private static final String FILE_PATH = "db/wiseSaying/"; // JSON 파일 위치
-    private static final String LAST_ID_FILE = FILE_PATH + "lastId.txt"; // 마지막 ID 저장 파일
+    private final String filePath; // JSON 파일 위치
+    private final String lastIdFile; // 마지막 ID 저장 파일
+
+    // 기본 생성자 (프로덕션 환경 경로 설정)
+    public WiseSayingRepository() {
+        this("db/run/");
+    }
+
+    // 경로를 주입받는 생성자 (테스트 환경에서 활용)
+    public WiseSayingRepository(String filePath) {
+        this.filePath = filePath;
+        this.lastIdFile = filePath + "lastId.txt";
+    }
 
     // 명언을 파일로 저장, 있으면 덮어쓰기
     public void add(WiseSaying wiseSaying, int newId) throws IOException {
         String fileName = getFileName(newId);
 
-        File directory = new File(FILE_PATH);
+        File directory = new File(filePath);
 
         // 디렉토리가 존재하지 않으면 생성
         if (!directory.exists()) {
@@ -26,12 +37,12 @@ public class WiseSayingRepository {
 
             // 디텍터리 생성 결과
             if(!created) {
-                throw new RuntimeException("디렉토리 생성 실패: " + FILE_PATH);
+                throw new RuntimeException("디렉토리 생성 실패: " + filePath);
             }
         }
 
         try (FileWriter writer = new FileWriter(fileName, false)) {
-            writer.write(toJson(wiseSaying));  // WiseSaying 객체를 JSON 문자열로 변환하여 저장
+            writer.write(toJSON(wiseSaying));  // WiseSaying 객체를 JSON 문자열로 변환하여 저장
         } catch (IOException e) {
             throw new IOException("파일 저장 중 오류 발생:\n " + e.getMessage(), e);
         }
@@ -41,7 +52,7 @@ public class WiseSayingRepository {
     public List<WiseSaying> findAll(){
         List<WiseSaying> wiseSayings = new ArrayList<>();
 
-        File directory = new File(FILE_PATH);
+        File directory = new File(filePath);
         if (!directory.exists()) {
             return wiseSayings;
         }
@@ -52,7 +63,7 @@ public class WiseSayingRepository {
         }
 
         for (File file : files) {
-            WiseSaying wiseSaying = readWiseFromJson(file);
+            WiseSaying wiseSaying = readWiseFromJSON(file);
             wiseSayings.add(wiseSaying);
         }
 
@@ -60,7 +71,7 @@ public class WiseSayingRepository {
     }
 
     // ID로 명언 조회
-    public WiseSaying findById(int id) throws Exception {
+    public WiseSaying findByID(int id) throws Exception {
         String fileName = getFileName(id);
         File file = new File(fileName);
 
@@ -68,11 +79,11 @@ public class WiseSayingRepository {
             throw new IOException("저장된 파일이 없습니다.");
         }
 
-        return readWiseFromJson(file);
+        return readWiseFromJSON(file);
     }
 
     // ID로 명언 삭제
-    public boolean deleteById(int id) throws Exception {
+    public boolean deleteByID(int id) throws Exception {
         String fileName = getFileName(id);
         File file = new File(fileName);
 
@@ -89,7 +100,7 @@ public class WiseSayingRepository {
     }
 
     // 명언 수정
-    public boolean updateById(int id, String newWiseSaying, String newAuthor) throws Exception {
+    public boolean updateByID(int id, String newWiseSaying, String newAuthor) throws Exception {
         String fileName = getFileName(id);
         File file = new File(fileName);
 
@@ -97,12 +108,12 @@ public class WiseSayingRepository {
             throw new IOException("저장된 파일이 없습니다.");
         }
 
-        WiseSaying existingWiseSaying = readWiseFromJson(file);
+        WiseSaying existingWiseSaying = readWiseFromJSON(file);
 
         existingWiseSaying.setWiseSaying(newWiseSaying);
         existingWiseSaying.setAuthor(newAuthor);
 
-        return writeWiseToJson(file, existingWiseSaying);
+        return writeWiseToJSON(file, existingWiseSaying);
     }
 
     // 모든 JSON을 합친 data.json 생성
@@ -110,7 +121,7 @@ public class WiseSayingRepository {
         List<WiseSaying> list = findAll();
         String fileName = getFileNmae("data");
 
-        String jsonContent = toJson(list);
+        String jsonContent = toJSON(list);
 
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, false))){
             writer.write(jsonContent);
@@ -121,8 +132,8 @@ public class WiseSayingRepository {
     }
 
     // 마지막 ID 저장
-    public void saveLastId(int lastId) {
-        try (FileWriter writer = new FileWriter(LAST_ID_FILE)) {
+    public void saveLastID(int lastId) {
+        try (FileWriter writer = new FileWriter(lastIdFile)) {
             writer.write(String.valueOf(lastId));
         } catch (IOException e) {
             throw new RuntimeException("파일 저장 중 오류 발생: \n" + e.getMessage(), e);
@@ -130,8 +141,8 @@ public class WiseSayingRepository {
     }
 
     // 마지막 ID 파일 읽기
-    public int readLastId() {
-        File file = new File(LAST_ID_FILE);
+    public int readLastID() {
+        File file = new File(lastIdFile);
 
         if (!file.exists()) {
             return 0;
@@ -146,7 +157,7 @@ public class WiseSayingRepository {
     }
 
     // WiseSaying 객체를 JSON 문자열로 변환
-    private String toJson(WiseSaying wiseSaying) {
+    private String toJSON(WiseSaying wiseSaying) {
         return "{\n" +
                 "  \"id\": " + wiseSaying.getId() + ",\n" +
                 "  \"wiseSaying\": \"" + wiseSaying.getWiseSaying() + "\",\n" +
@@ -154,7 +165,7 @@ public class WiseSayingRepository {
                 "}";
     }
 
-    private String toJson(List<WiseSaying> list) {
+    private String toJSON(List<WiseSaying> list) {
         StringBuilder jsonBuilder= new StringBuilder("[\n");
 
         for (int i = 0; i < list.size(); i++) {
@@ -177,7 +188,7 @@ public class WiseSayingRepository {
         return jsonBuilder.toString();
     }
 
-    private WiseSaying jsonToString(String json) {
+    private WiseSaying JSONToString(String json) {
         json = json.substring(1, json.length() - 1);  // 앞뒤 중괄호 제거
         Map<String, String> jsonMap = new HashMap<>();
 
@@ -197,23 +208,23 @@ public class WiseSayingRepository {
     }
 
     // JSON 파일에서 WiseSaying 객체 읽기
-    private WiseSaying readWiseFromJson (File file) {
+    private WiseSaying readWiseFromJSON(File file) {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             StringBuilder jsonContent = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
                 jsonContent.append(line);
             }
-            return jsonToString(jsonContent.toString());
+            return JSONToString(jsonContent.toString());
         } catch (IOException e) {
             throw new RuntimeException("파일 읽기 중 오류 발생: \n" + e.getMessage(), e);
         }
     }
 
     // 파일에 WiseSaying 객체 저장
-    private boolean writeWiseToJson(File file, WiseSaying wiseSaying) {
+    private boolean writeWiseToJSON(File file, WiseSaying wiseSaying) {
         try (FileWriter writer = new FileWriter(file)) {
-            writer.write(toJson(wiseSaying));
+            writer.write(toJSON(wiseSaying));
 
             return true;
         } catch (IOException e) {
@@ -223,8 +234,8 @@ public class WiseSayingRepository {
 
     // ID에 해당하는 파일 경로 얻기
     private String getFileName(int id) {
-        return FILE_PATH + id + ".json";
+        return filePath + id + ".json";
     }
-    private String getFileNmae(String id){ return FILE_PATH + id + ".json"; }
+    private String getFileNmae(String id){ return filePath + id + ".json"; }
 
 }

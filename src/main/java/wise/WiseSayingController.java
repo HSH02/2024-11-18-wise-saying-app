@@ -1,10 +1,8 @@
-package org.ll.controller;
+package wise;
 
-import org.ll.model.WiseSaying;
-import org.ll.service.WiseSayingService;
+import wise.model.WiseSaying;
+import wise.service.WiseSayingService;
 
-import java.util.InputMismatchException;
-import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 /*
@@ -64,6 +62,11 @@ public class WiseSayingController {
 
         System.out.print("작가 : ");
         String author = scanner.nextLine();
+
+        if(wiseSaying.isEmpty() || author.isEmpty()){
+            System.out.println("내용이 비어있을 수는 없습니다.");
+            return;
+        }
 
         try {
             int id = wiseSayingService.add(wiseSaying, author);

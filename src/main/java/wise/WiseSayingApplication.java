@@ -1,8 +1,7 @@
-package org.ll;
+package wise;
 
-import org.ll.controller.WiseSayingController;
-import org.ll.repository.WiseSayingRepository;
-import org.ll.service.WiseSayingService;
+import wise.repository.WiseSayingRepository;
+import wise.service.WiseSayingService;
 
 public class WiseSayingApplication {
 

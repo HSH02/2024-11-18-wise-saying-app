@@ -1,4 +1,4 @@
-package org.ll.model;
+package wise.model;
 
 
 /*
