@@ -1,4 +1,4 @@
-package wise;
+package wise.controller;
 
 import wise.model.WiseSaying;
 import wise.service.WiseSayingService;
@@ -97,8 +97,11 @@ public class WiseSayingController {
 
             if (id == -1) return; // 잘못된 ID일 경우 처리 중지
 
-            String resultMessage = wiseSayingService.deleteById(id);
-            System.out.println(resultMessage);
+            if (wiseSayingService.deleteById(id) ){
+                System.out.println(id + "번 명언 삭제 완료");
+            } else {
+                System.out.println(id + "번 명언은 존재하지 않습니다.");
+            }
         } catch (Exception e) {
             System.err.println("명언 삭제 중 오류 발생: \n" + e.getMessage());
         }
@@ -133,10 +136,13 @@ public class WiseSayingController {
             }
 
             // 4. 수정된 정보로 업데이트
-            String resultMessage = wiseSayingService.updateById(id, newWiseSaying, newAuthor);
-            System.out.println(resultMessage);
+            if(wiseSayingService.updateById(id, newWiseSaying, newAuthor)){
+                System.out.println(id + "번 명언 수정 완료");
+            } else {
+                System.out.println(id + "번 명언은 존재하지 않습니다.");
+            }
         } catch (Exception e) {
-            System.out.println("명언 수정 중 오류 발생: " + e.getMessage());
+            System.err.println("명언 수정 중 오류 발생: " + e.getMessage());
         }
     }
 

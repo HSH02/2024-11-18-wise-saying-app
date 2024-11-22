@@ -1,5 +1,6 @@
 package wise;
 
+import wise.controller.WiseSayingController;
 import wise.repository.WiseSayingRepository;
 import wise.service.WiseSayingService;
 

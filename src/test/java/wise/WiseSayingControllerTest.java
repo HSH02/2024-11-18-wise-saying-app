@@ -1,174 +1,154 @@
 package wise;
 
 import org.junit.jupiter.api.*;
+import wise.controller.WiseSayingController;
 import wise.repository.WiseSayingRepository;
 import wise.service.WiseSayingService;
 
 import java.io.*;
-import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static wise.WiseSayingTestInput.*;
 
 class WiseSayingControllerTest {
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    private final PrintStream originalOut = System.out;
-    private final PrintStream originalErr = System.err;
-
-    private WiseSayingRepository wiseSayingRepository;
     private WiseSayingService wiseSayingService;
     private WiseSayingController wiseSayingController;
 
+    // System.out 출력을 캡처하기 위한 변수
+    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+    private final PrintStream originalOut = System.out;
+
     @BeforeEach
-    public void setUpStreams() {
-        wiseSayingRepository = new WiseSayingRepository("db/test/");
+    public void setUp() {
+        // 출력 스트림 캡처
+        System.setOut(new PrintStream(outContent));
+
+        // 객체 초기화
+        WiseSayingRepository wiseSayingRepository = new WiseSayingRepository(false);
         wiseSayingService = new WiseSayingService(wiseSayingRepository);
         wiseSayingController = new WiseSayingController(wiseSayingService);
-
-        // 표준 출력 리다이렉션
-        System.setOut(new PrintStream(outContent));
     }
 
     @AfterEach
-    public void restoreStreams() {
-        // 표준 입출력 원래대로 복원
+    public void tearDown() {
+        // 출력 스트림 복구
         System.setOut(originalOut);
-        System.setErr(originalErr);
+    }
+
+    private void setInput(String input) {
+        InputStream in = new ByteArrayInputStream(input.getBytes());
+        System.setIn(in);
     }
 
     // 명언 등록 성공 테스트
     @Test
+    @DisplayName("명언 등록 성공 테스트")
     void addSuccess() {
-        // 입력 시뮬레이션
-        ByteArrayOutputStream output = setOutToByteArray();
+        // given
+        wiseSayingService.clearTestPath();
+        setInput(INPUT_ADD);
 
-        // 컨트롤러 실행
+        // when
         wiseSayingController.run();
 
-        // 출력 내용 검증
-        String result = outContent.toString().trim();
-        // int id = wiseSayingRepository.();
-        System.out.println(output);
-        // assertTrue(output.result("번 명언이 등록되었습니다."));
+        // then
+        String output = outContent.toString();
+        System.err.println(output); // 디버깅용 출력
 
-        clearSetOutToByteArray(output);
-        System.out.println(output);
+        assertTrue(output.contains("명언 : "), "명언 입력 프롬프트가 출력되어야 합니다.");
+        assertTrue(output.contains("작가 : "), "작가 입력 프롬프트가 출력되어야 합니다.");
+        assertTrue(output.contains("번 명언이 등록되었습니다."), "등록 완료 메시지가 출력되어야 합니다.");
     }
 
-    // 명언 등록 실패 - 빈 입력 테스트
-//    @DisplayName("명언 등록에 실패했습니다.")
-//    @Test
-//    void testAddFailure_BlankInput() {
-//        System.setIn(new ByteArrayInputStream(INPUT_ADD_FAIL_BLANK.getBytes()));
-//
-//        wiseSayingController.run();
-//
-//        String output = outContent.toString();
-//        //assertTrue(output.contains("내용이 비어있을 수는 없습니다."));
-//        System.out.println(output);
-//    }
-
     // 명언 목록 조회 성공 테스트
-    @DisplayName("명언 목록을 조회합니다.")
+    @DisplayName("명언 목록 조회 테스트")
     @Test
-    void testFindAllSuccess() {
-        System.setIn(new ByteArrayInputStream(INPUT_FIND_ALL.getBytes()));
+    void findAllSuccess() {
+        // given
+        wiseSayingService.clearTestPath();
+        setInput(INPUT_FIND_ALL);
 
+        // when
         wiseSayingController.run();
 
+        // then
         String output = outContent.toString();
-        //assertTrue(output.contains("Wise  1"));
-        //assertTrue(output.contains("Wise 2"));
-        System.out.println(output);
+        System.err.println(output); // 디버깅용 출력
+
+        assertTrue(output.contains("1 / Author 1 / Wise 1"), "1번 명언은 출력되어야 합니다");
+        assertTrue(output.contains("2 / Author 2 / Wise 2"), "2번 명언은 출력되어야 합니다");
     }
 
     // 명언 삭제 성공 테스트
-    @DisplayName("명언을 삭제합니다.")
+    @DisplayName("명언 삭제 테스트")
     @Test
-    void testDeleteSuccess() {
-        System.setIn(new ByteArrayInputStream(INPUT_DELETE_SUCCESS.getBytes()));
+    void deleteSuccess() {
+        // given
+        wiseSayingService.clearTestPath();
+        setInput(INPUT_DELETE_SUCCESS);
 
+        // when
         wiseSayingController.run();
 
+        // then
         String output = outContent.toString();
-        // assertTrue(output.contains("1번 명언이 삭제되었습니다."));
-        System.out.println(output);
+        System.err.println(output); // 디버깅용 출력
+
+        assertTrue(output.contains("번 명언이 삭제되었습니다."), "1번 명언은 삭제되어야 합니다");
     }
 
-    // 명언 삭제 실패 - 존재하지 않는 ID 테스트
-//    @Test
-//    void testDeleteFailure_IDNone() {
-//        System.setIn(new ByteArrayInputStream(INPUT_DELETE_FAIL_ID_NONE.getBytes()));
-//
-//        wiseSayingController.run();
-//
-//        String output = outContent.toString();
-//        // assertTrue(output.contains("10000번 명언은 존재하지 않습니다."));
-//        System.out.println(output);
-//    }
+    // 명언 삭제 실패 테스트
+    @DisplayName("명언 삭제 실패 테스트")
+    @Test
+    void deleteFail_IDNone() {
+        // given
+        wiseSayingService.clearTestPath();
+        setInput(INPUT_DELETE_FAIL_NULL_ID);
+
+        // when
+        wiseSayingController.run();
+
+        // then
+        String output = outContent.toString();
+        System.err.println(output); // 디버깅용 출력
+
+        assertTrue(output.contains("해당 파일은 존재하지 않습니다."), "명언이 존재하지 않을 경우 메시지가 출력되어야 합니다");
+    }
 
     // 명언 수정 성공 테스트
-    @DisplayName("명언을 수정합니다.")
+    @DisplayName("명언 수정 테스트")
     @Test
-    void testUpdateSuccess() {
-        System.setIn(new ByteArrayInputStream(INPUT_UPDATE_SUCCESS.getBytes()));
+    void updateSuccess() {
+        // given
+        wiseSayingService.clearTestPath();
+        setInput(INPUT_UPDATE_SUCCESS);
 
+        // when
         wiseSayingController.run();
 
+        // then
         String output = outContent.toString();
-        // assertTrue(output.contains("1번 명언이 수정되었습니다."));
-        System.out.println(output.trim());
-    }
+        System.err.println(output); // 디버깅용 출력
 
-    // 명언 수정 실패 - 존재하지 않는 ID 테스트
-//    @Test
-//    void testUpdateFailure_IDNone() {
-//        System.setIn(new ByteArrayInputStream(INPUT_UPDATE_FAIL_ID_NONE.getBytes()));
-//
-//        wiseSayingController.run();
-//
-//        String output = outContent.toString();
-//        // assertTrue(output.contains("10000번 명언은 존재하지 않습니다."));
-//        System.out.println(output);
-//    }
+        assertTrue(output.contains("번 명언이 수정되었습니다."), "명언은 수정되어야 합니다.");
+    }
 
     // 빌드 성공 테스트
-    @DisplayName("빌드 처리를 진행합니다..")
+    @DisplayName("빌드 처리 테스트")
     @Test
     void testBuildSuccess() {
-        System.setIn(new ByteArrayInputStream(INPUT_BUILD.getBytes()));
+        // given
+        wiseSayingService.clearTestPath();
+        setInput(INPUT_BUILD);
 
+        // when;
         wiseSayingController.run();
 
+        // then
         String output = outContent.toString();
-        // assertTrue(output.contains("data.json 파일의 내용이 갱신되었습니다."));
-        System.out.println(output);
-    }
+        System.err.println(output); // 디버깅용 출력
 
-    public static Scanner genScanner(final String input) {
-        final InputStream in = new ByteArrayInputStream(input.getBytes());
-
-        return new Scanner(in);
-    }
-
-    // System.out의 출력을 스트림으로 받기
-    public static ByteArrayOutputStream setOutToByteArray() {
-        final ByteArrayOutputStream output = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(output));
-
-        return output;
-    }
-
-    // setOutToByteArray 함수의 사용을 완료한 후 정리하는 함수, 출력을 다시 정상화 하는 함수
-    public static void clearSetOutToByteArray(final ByteArrayOutputStream output) {
-        System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
-        try {
-            output.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        assertTrue(output.contains("data.json 파일의 내용이 갱신되었습니다."), "data.json 파일은 갱신되어야만 합니다.");
     }
 
 }

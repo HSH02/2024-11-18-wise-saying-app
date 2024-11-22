@@ -5,7 +5,6 @@ import java.util.List;
 
 public class WiseSayingTestInput {
 
-    // 성공 시나리오들
     public static final String INPUT_ADD = TestScenarioInput.builder()
             .add("현재를 사랑하라.", "작자미상")
             .create()
@@ -19,22 +18,48 @@ public class WiseSayingTestInput {
             .generateInput();
 
     public static final String INPUT_DELETE_SUCCESS = TestScenarioInput.builder()
-            .add("Wise", "Author")
+            .add("Wise 1", "Author 1")
+            .add("Wise 2", "Author 2")
+            .list()
             .delete(1)
             .create()
             .generateInput();
 
+    public static final String INPUT_DELETE_FAIL_NULL_ID = TestScenarioInput.builder()
+            .add("Wise 1", "Author 1")
+            .add("Wise 2", "Author 2")
+            .list()
+            .delete(1)
+            .delete(1)
+            .create()
+            .generateInput();
+
+
     public static final String INPUT_UPDATE_SUCCESS = TestScenarioInput.builder()
-            .add("Before Wise", "Before Author")
-            .update(1, "After Wise", "After Author")
+            .add("Wise 1", "Author 1")
+            .add("Wise 2", "Author 2")
+            .list()
+            .delete(1)
+            .delete(1)
+            .update(1, "", "")
+            .update(3, "", "")
+            .update(2, "updated Wise 2", "updated Author 2")
+            .list()
             .create()
             .generateInput();
 
     public static final String INPUT_BUILD = TestScenarioInput.builder()
+            .add("Wise 1", "Author 1")
+            .add("Wise 2", "Author 2")
+            .add("Wise 3", "Author 3")
+            .list()
+            .delete(1)
+            .delete(1)
+            .update(2, "updated Wise 2", "updated Author 2")
+            .list()
             .build()
             .create()
             .generateInput();
-
 
     // 테스트 시나리오를 위한 입력 생성 메서드
     public static class TestScenarioInput {

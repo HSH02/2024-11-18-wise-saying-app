@@ -21,8 +21,14 @@ public class WiseSayingService {
         lastId = wiseSayingRepository.readLastID(); // 마지막 ID 파일 읽기
     }
 
+    // 테스트 경로 명언 삭제 후 마지막 ID 갱신
+    public void clearTestPath() {
+        wiseSayingRepository.clear();
+        lastId = wiseSayingRepository.readLastID(); // ID 재설정
+    }
+
     // 명언 추가
-    public int add(String wiseSaying, String author) throws Exception {
+    public int add(String wiseSaying, String author)  {
         WiseSaying newWiseSaying = new WiseSaying(++lastId, wiseSaying, author);
 
         wiseSayingRepository.add(newWiseSaying, lastId); // 파일 저장
@@ -32,7 +38,7 @@ public class WiseSayingService {
     }
 
     // ID로 명언 반환
-    public WiseSaying findByID(int id) throws Exception{
+    public WiseSaying findByID(int id) {
         WiseSaying wiseSaying = wiseSayingRepository.findByID(id);
         if(wiseSaying == null) {
             throw new IllegalArgumentException(id + "번 명언은 존재하지 않습니다.");
@@ -46,25 +52,20 @@ public class WiseSayingService {
     }
 
     // ID로 명언 삭제
-    public String deleteById(int id) throws Exception {
-        if (!wiseSayingRepository.deleteByID(id))  {
-            return id + "번 명언은 존재하지 않습니다.";
-        }
-        return id + "번 명언이 삭제되었습니다.";
+    public boolean deleteById(int id) throws Exception {
+        return wiseSayingRepository.deleteByID(id);
     }
 
     // ID로 명언 수정
-    public String updateById(int id, String newWiseSaying, String newAuthor) throws Exception {
-        if (!wiseSayingRepository.updateByID(id, newWiseSaying, newAuthor)) {
-            return id + "번 명언은 존재하지 않습니다.";
-        }
-        return id + "번 명언이 수정되었습니다.";
+    public boolean updateById(int id, String newWiseSaying, String newAuthor)  {
+        return wiseSayingRepository.updateByID(id, newWiseSaying, newAuthor);
     }
 
     // 모든 json을 합친 data.json 생성
-    public String build() throws Exception{
+    public String build() {
         boolean isSuccess = wiseSayingRepository.build();
         return isSuccess ? "data.json 파일의 내용이 갱신되었습니다." : "오류 발생";
     }
+
 
 }
