@@ -82,7 +82,7 @@ public class WiseSayingRepository {
         File file = new File(fileName);
 
         if (!file.exists()) {
-            throw new IOException("저장된 파일이 없습니다.\n 입력된 파일명: " + fileName);
+            return false;
         }
 
         try {

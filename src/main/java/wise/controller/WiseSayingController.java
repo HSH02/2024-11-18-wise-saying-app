@@ -58,10 +58,12 @@ public class WiseSayingController {
     // 명언 등록
     private void add(Scanner scanner){
         System.out.print("명언 : ");
-        String wiseSaying = scanner.nextLine();
+        String wiseSaying = scanner.nextLine().trim();
+        // System.out.println("DEBUG: wiseSaying = " + wiseSaying);
 
         System.out.print("작가 : ");
-        String author = scanner.nextLine();
+        String author = scanner.nextLine().trim();
+        // System.out.println("DEBUG: author = " + author);
 
         if(wiseSaying.isEmpty() || author.isEmpty()){
             System.out.println("내용이 비어있을 수는 없습니다.");
@@ -98,7 +100,7 @@ public class WiseSayingController {
             if (id == -1) return; // 잘못된 ID일 경우 처리 중지
 
             if (wiseSayingService.deleteById(id) ){
-                System.out.println(id + "번 명언 삭제 완료");
+                System.out.println(id + "번 명언이 삭제되었습니다.");
             } else {
                 System.out.println(id + "번 명언은 존재하지 않습니다.");
             }
@@ -137,7 +139,7 @@ public class WiseSayingController {
 
             // 4. 수정된 정보로 업데이트
             if(wiseSayingService.updateById(id, newWiseSaying, newAuthor)){
-                System.out.println(id + "번 명언 수정 완료");
+                System.out.println(id + "번 명언이 수정되었습니다.");
             } else {
                 System.out.println(id + "번 명언은 존재하지 않습니다.");
             }

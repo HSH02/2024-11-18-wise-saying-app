@@ -6,16 +6,16 @@ import java.util.List;
 public class WiseSayingTestInput {
 
     public static final String INPUT_ADD = TestScenarioInput.builder()
-            .add("현재를 사랑하라.", "작자미상")
+            .add("Wise 1", "Author 1")
             .create()
-            .generateInput();
+            .generateString();
 
     public static final String INPUT_FIND_ALL = TestScenarioInput.builder()
             .add("Wise 1", "Author 1")
             .add("Wise 2", "Author 2")
             .list()
             .create()
-            .generateInput();
+            .generateString();
 
     public static final String INPUT_DELETE_SUCCESS = TestScenarioInput.builder()
             .add("Wise 1", "Author 1")
@@ -23,7 +23,7 @@ public class WiseSayingTestInput {
             .list()
             .delete(1)
             .create()
-            .generateInput();
+            .generateString();
 
     public static final String INPUT_DELETE_FAIL_NULL_ID = TestScenarioInput.builder()
             .add("Wise 1", "Author 1")
@@ -32,7 +32,7 @@ public class WiseSayingTestInput {
             .delete(1)
             .delete(1)
             .create()
-            .generateInput();
+            .generateString();
 
 
     public static final String INPUT_UPDATE_SUCCESS = TestScenarioInput.builder()
@@ -46,7 +46,7 @@ public class WiseSayingTestInput {
             .update(2, "updated Wise 2", "updated Author 2")
             .list()
             .create()
-            .generateInput();
+            .generateString();
 
     public static final String INPUT_BUILD = TestScenarioInput.builder()
             .add("Wise 1", "Author 1")
@@ -59,7 +59,7 @@ public class WiseSayingTestInput {
             .list()
             .build()
             .create()
-            .generateInput();
+            .generateString();
 
     // 테스트 시나리오를 위한 입력 생성 메서드
     public static class TestScenarioInput {
@@ -69,7 +69,7 @@ public class WiseSayingTestInput {
             this.commands = commands;
         }
 
-        public String generateInput() {
+        public String generateString() {
             StringBuilder sb = new StringBuilder();
             for (String command : commands) {
                 sb.append(command).append("\n");
