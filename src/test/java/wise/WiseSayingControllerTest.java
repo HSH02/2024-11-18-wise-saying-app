@@ -6,53 +6,48 @@ import wise.repository.WiseSayingRepository;
 import wise.service.WiseSayingService;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static wise.WiseSayingTestInput.*;
 
 class WiseSayingControllerTest {
-    private static final String TEST_DB_PATH = "src/test/resources/db/wiseSaying/";
     private WiseSayingService wiseSayingService;
     private WiseSayingController wiseSayingController;
 
     // System.out 출력을 캡처하기 위한 변수
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();   // 메모리에 출력을 저장하는 스트림
-    private final PrintStream originalOut = System.out;     // System.out를 저장하고 테스트 후 복구하기 위한 용도
+    private final PrintStream originalOut = System.out;     // System.out 저장하고 테스트 후 복구하기 위한 용도
 
     @BeforeEach
     public void setUp() {
-        System.setOut(new PrintStream(outContent)); // System.out을 캡처
+        System.setOut(new PrintStream(outContent)); // System.out 캡처
 
         WiseSayingRepository wiseSayingRepository = new WiseSayingRepository(false);
         wiseSayingService = new WiseSayingService(wiseSayingRepository);
-        wiseSayingController = new WiseSayingController(wiseSayingService);
     }
 
     @AfterEach
     public void tearDown() {
-        System.setOut(originalOut); // System.out을 원래 상태로 복원
+        System.setOut(originalOut); // System.out 원래 상태로 복원
         wiseSayingService.clearTestPath(); // 테스트 DB 정리
     }
 
-    private void setInput(String input) {
+    public static Scanner setInput(String input) {
         InputStream in = new ByteArrayInputStream(input.getBytes());
-        System.setIn(in);
+
+        return new Scanner(in);
     }
 
     // 명언 등록 성공 테스트
     @Test
     @DisplayName("명언 등록 성공 테스트")
-    void addSuccess() throws Exception {
+    void addSuccess()  {
         // given
-        setInput(INPUT_ADD);
+        WiseSayingController controller = new WiseSayingController(wiseSayingService, setInput(INPUT_ADD));
 
         // when
-        wiseSayingController.run();
+        controller.run();
         String output = outContent.toString();
 
         // then
@@ -68,20 +63,41 @@ class WiseSayingControllerTest {
     // 명언 목록 조회 성공 테스트
     @DisplayName("명언 목록 조회 테스트")
     @Test
-    void findAllSuccess() {
+    void findByKeyWordSuccess() {
         // given
-        setInput(INPUT_FIND_ALL);
+        WiseSayingController controller = new WiseSayingController(wiseSayingService, setInput(INPUT_FIND_ALL));
 
         // when
-        wiseSayingController.run();
+        controller.run();
 
         // then
         String output = outContent.toString(); // 캡처된 내용을 문자열로 변환
 
         System.err.println("\n=== 출력 메시지 검증 ===");
+        System.err.println(output);
         assertAll(
                 () -> assertTrue(output.contains("1 / Author 1 / Wise 1"), "1번 명언은 출력되어야 합니다"),
                 () -> assertTrue(output.contains("2 / Author 2 / Wise 2"), "2번 명언은 출력되어야 합니다")
+        );
+    }
+
+    // 명언 검색 조회 성공 테스트
+    @DisplayName("명언 검색 조회 테스트")
+    @Test
+    void findByKeyWordByKeywordSuccess() {
+        // given
+        WiseSayingController controller = new WiseSayingController(wiseSayingService, setInput(INPUT_FIND_KEYWORD));
+
+        // when
+        controller.run();
+
+        // then
+        String output = outContent.toString(); // 캡처된 내용을 문자열로 변환
+        System.err.println(output);
+
+        assertAll(
+                () ->  assertTrue(output.replaceAll("[\r\n]", "").contains("1 / A / A"), "출력 내용이 예상과 일치하지 않습니다."),
+                () ->  assertTrue(output.replaceAll("[\r\n]", "").contains("3 / A / C"), "출력 내용이 예상과 일치하지 않습니다.")
         );
     }
 
@@ -90,10 +106,10 @@ class WiseSayingControllerTest {
     @Test
     void deleteSuccess() {
         // given
-        setInput(INPUT_DELETE_SUCCESS);
+        WiseSayingController controller = new WiseSayingController(wiseSayingService, setInput(INPUT_DELETE_SUCCESS));
 
         // when
-        wiseSayingController.run();
+        controller.run();
 
         // then
         String output = outContent.toString(); // 캡처된 내용을 문자열로 변환
@@ -108,10 +124,10 @@ class WiseSayingControllerTest {
     @Test
     void deleteFail_IDNone() {
         // given
-        setInput(INPUT_DELETE_FAIL_NULL_ID);
+        WiseSayingController controller = new WiseSayingController(wiseSayingService, setInput(INPUT_DELETE_FAIL_NULL_ID));
 
         // when
-        wiseSayingController.run();
+        controller.run();
 
         // then
         String output = outContent.toString(); // 캡처된 내용을 문자열로 변환
@@ -126,10 +142,10 @@ class WiseSayingControllerTest {
     @Test
     void updateSuccess() {
         // given
-        setInput(INPUT_UPDATE_SUCCESS);
+        WiseSayingController controller = new WiseSayingController(wiseSayingService, setInput(INPUT_UPDATE_SUCCESS));
 
         // when
-        wiseSayingController.run();
+        controller.run();
 
         // then
         String output = outContent.toString(); // 캡처된 내용을 문자열로 변환
@@ -144,10 +160,10 @@ class WiseSayingControllerTest {
     @Test
     void testBuildSuccess() {
         // given
-        setInput(INPUT_BUILD);
+        WiseSayingController controller = new WiseSayingController(wiseSayingService, setInput(INPUT_BUILD));
 
-        // when;
-        wiseSayingController.run();
+        // when
+        controller.run();
 
         // then
         String output = outContent.toString(); // 캡처된 내용을 문자열로 변환

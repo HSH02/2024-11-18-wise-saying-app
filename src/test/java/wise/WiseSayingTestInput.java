@@ -17,6 +17,14 @@ public class WiseSayingTestInput {
             .create()
             .generateString();
 
+    public static final String INPUT_FIND_KEYWORD = TestScenarioInput.builder()
+            .add("A","A")
+            .add("B","B")
+            .add("C","A")
+            .list("author","A")
+            .create()
+            .generateString();
+
     public static final String INPUT_DELETE_SUCCESS = TestScenarioInput.builder()
             .add("Wise 1", "Author 1")
             .add("Wise 2", "Author 2")
@@ -90,9 +98,9 @@ public class WiseSayingTestInput {
                 return new TestScenarioInput(commands);
             }
 
-            public ScenarioBuilder add(String wiseSaying, String author) {
+            public ScenarioBuilder add(String content, String author) {
                 commands.add("등록");
-                commands.add(wiseSaying);
+                commands.add(content);
                 commands.add(author);
                 return this;
             }
@@ -102,14 +110,19 @@ public class WiseSayingTestInput {
                 return this;
             }
 
+            public ScenarioBuilder list(String keywordType, String keyword) {
+                commands.add("목록?keywordType=" + keywordType + "&keyword=" + keyword);
+                return this;
+            }
+
             public ScenarioBuilder delete(int id) {
                 commands.add("삭제?id=" + id);
                 return this;
             }
 
-            public ScenarioBuilder update(int id, String newWiseSaying, String newAuthor) {
+            public ScenarioBuilder update(int id, String newContent, String newAuthor) {
                 commands.add("수정?id=" + id);
-                commands.add(newWiseSaying);
+                commands.add(newContent);
                 commands.add(newAuthor);
                 return this;
             }

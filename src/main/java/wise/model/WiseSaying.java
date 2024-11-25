@@ -1,49 +1,70 @@
 package wise.model;
 
-
-/*
-* 역할 : 명언 객체(번호/명언내용/작가)
-*
-* 이 파일은 컨트롤러, 서비스, 리포지터티 모두에서 사용가능
-*/
+/**
+ * 명언 엔티티를 나타내는 클래스입니다.
+ * 각 명언은 고유 번호(id), 내용(content), 작가(author)를 포함합니다.
+ *
+ */
 public class WiseSaying {
-    private final int id;         // 문장 번호
-    private String wiseSaying;    // 명언
-    private String author;        // 작가
+    private int id;         // 문장 고유 번호
+    private String content; // 명언 내용
+    private String author;  // 명언 작가
 
-    // 생성자
-    public WiseSaying(int id, String wiseSaying, String author) {
+    /**
+     * WiseSaying 객체를 생성합니다.
+     *
+     * @param id       문장 고유 번호
+     * @param content  명언 내용
+     * @param author   명언 작가
+     */
+    public WiseSaying(int id, String content, String author) {
         this.id = id;
-        this.wiseSaying = wiseSaying;
+        this.content = content;
         this.author = author;
     }
 
-    // Getter
+    /**
+     * 고유 번호를 반환합니다.
+     *
+     * @return 고유 번호
+     */
     public int getId() {
         return id;
     }
 
-    public String getWiseSaying() {
-        return wiseSaying;
+    /**
+     * 명언 내용을 반환합니다.
+     *
+     * @return 명언 내용
+     */
+    public String getContent() {
+        return content;
     }
 
+    /**
+     * 명언 내용을 설정합니다.
+     *
+     * @param content 새로운 명언 내용
+     */
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    /**
+     * 명언 작가를 반환합니다.
+     *
+     * @return 명언 작가
+     */
     public String getAuthor() {
         return author;
     }
 
-    // Setter
-    public void setWiseSaying(String wiseSaying) {
-        this.wiseSaying = wiseSaying;
-    }
-
+    /**
+     * 명언 작가를 설정합니다.
+     *
+     * @param author 새로운 명언 작가
+     */
     public void setAuthor(String author) {
         this.author = author;
     }
-
-    // toString 오버라이딩
-    @Override
-    public String toString() {
-        return id + " / " + author + " / " + wiseSaying;
-    }
-
 }

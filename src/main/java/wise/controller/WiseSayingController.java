@@ -3,178 +3,161 @@ package wise.controller;
 import wise.model.WiseSaying;
 import wise.service.WiseSayingService;
 
+import java.util.List;
 import java.util.Scanner;
 
-/*
- * 역할 : 고객의 명령을 입력받고 적절을 응답을 표현
- * 이 단계에서는 스캐너 사용가능
- * 전역 에러 헨들러로 빼보기
- */
+// TO-DO 예외처리 핸들러
 public class WiseSayingController {
-    // Service 객체
-    private final WiseSayingService wiseSayingService;
+    private final WiseSayingService service;
+    private final Scanner sc;
 
     // 생성자
-    public WiseSayingController(WiseSayingService wiseSayingService) {
-        this.wiseSayingService = wiseSayingService;
+    public WiseSayingController(WiseSayingService service) {
+        this(service, new Scanner(System.in));
+    }
+
+    public WiseSayingController(WiseSayingService service, Scanner sc ) {
+        this.service = service;
+        this.sc = sc;
     }
 
     // 프로그램 실행 메서드
     public void run() {
+        System.out.println("== 명언 앱 ==");
 
-        displayStartMessage(); // 시작 메시지 출력
+        while (true) {
+            System.out.print("명령) ");
+            String command = sc.nextLine().trim();
 
-        try (Scanner scanner = new Scanner(System.in)) {
-            while (true) {
-                System.out.print("명령 ) ");
-                String inputCommand = scanner.nextLine().trim(); // 명령 입력
-
-                if (inputCommand.equals("종료")) {
-                    System.out.println("프로그램을 종료합니다.");
-                    break;
-                }
-
-                // 명령어에 따라 분기 처리
-                switch (parseCommand(inputCommand)) {
-                    case "등록" -> add(scanner);
-                    case "목록" -> findAll();
-                    case "삭제" -> deleteById(inputCommand);
-                    case "수정" -> updateById(inputCommand, scanner);
-                    case "빌드" -> build();
-                    default -> System.out.println("올바른 명령이 아닙니다.");
-                }
+            if (command.equals("종료")) {
+                System.out.println("프로그램이 종료되었습니다.");
+                break;
+            } else if (command.equals("등록")) {
+                add();
+            } else if (command.startsWith("목록")) {
+                find(command);
+            } else if (command.startsWith("삭제")) {
+                delete(command);
+            } else if (command.startsWith("수정")) {
+                update(command);
+            } else if (command.equals("빌드")) {
+                build();
             }
-        } catch (Exception e) {
-            System.err.println("예상치 못한 오류 발생: " + e.getMessage());
         }
     }
 
-    // 시작 메시지 출력
-    private void displayStartMessage() {
-        String startMessage = "== 명언 앱 ==";
-        System.out.println(startMessage);
-    }
-
-    // 명언 등록
-    private void add(Scanner scanner){
+    private void add() {
         System.out.print("명언 : ");
-        String wiseSaying = scanner.nextLine().trim();
-        // System.out.println("DEBUG: wiseSaying = " + wiseSaying);
-
+        String content = sc.nextLine();
         System.out.print("작가 : ");
-        String author = scanner.nextLine().trim();
-        // System.out.println("DEBUG: author = " + author);
+        String author = sc.nextLine();
 
-        if(wiseSaying.isEmpty() || author.isEmpty()){
-            System.out.println("내용이 비어있을 수는 없습니다.");
-            return;
-        }
+        if (checkValid(content, author)) { return; }
 
-        try {
-            int id = wiseSayingService.add(wiseSaying, author);
-            System.out.println(id + "번 명언이 등록되었습니다.");
-        } catch (Exception e) {
-            System.err.println("명언 등록 중 오류 발생: \n" + e.getMessage());
-        }
+        int id = service.add(content, author);
+        System.out.println(id + "번 명언이 등록되었습니다.");
     }
 
     // 명언 목록 출력
-    private void findAll() {
+    private void find(String command) {
+        int page = 1;
+        int totalPages = service.getTotalPages();
+        String keywordType = "";
+        String keyword = "";
+
+
+        if(command.contains("?")){
+            String[] parts = command .split("\\?");
+            String[] params = parts[1].split("&");
+
+            for(String param : params) {
+                String[] keyValue = param.split("=");
+                switch (keyValue[0]) {
+                    case "page" -> page = Integer.parseInt(keyValue[1]);
+                    case "keywordType" -> keywordType = keyValue[1];
+                    case "keyword" -> keyword = keyValue[1];
+                }
+            }
+        }
+//
+        List<WiseSaying> wiseSayings = service.findAll();
         System.out.println("번호 / 작가 / 명언");
         System.out.println("----------------------");
 
-        try {
-            for (WiseSaying wiseSaying : wiseSayingService.findAll()) {
-                System.out.println(wiseSaying.toString());
-            }
-        } catch (Exception e) {
-            System.err.println("목록 출력 중 오류 발생: \n" + e.getMessage());
+        for (WiseSaying wiseSaying : wiseSayings) {
+            System.out.printf("%d / %s / %s\n",
+                    wiseSaying.getId(),
+                    wiseSaying.getAuthor(),
+                    wiseSaying.getContent());
         }
+
+        System.out.println("----------------------");
+        System.out.printf("페이지 : %s / %s\n",
+                                                page == 1? "[1]":"1",
+                                                page == totalPages?"["+ totalPages+"]": totalPages);
     }
 
     // 명언 삭제
-    private void deleteById(String command){
-        try {
-            int id = extractId(command); // ID 추출
+    private void delete(String command){
+        int id = parseId(command);
+        if (id == -1) return;
 
-            if (id == -1) return; // 잘못된 ID일 경우 처리 중지
-
-            if (wiseSayingService.deleteById(id) ){
-                System.out.println(id + "번 명언이 삭제되었습니다.");
-            } else {
-                System.out.println(id + "번 명언은 존재하지 않습니다.");
-            }
-        } catch (Exception e) {
-            System.err.println("명언 삭제 중 오류 발생: \n" + e.getMessage());
+        if (service.delete(id)){
+            System.out.println(id + "번 명언이 삭제되었습니다.");
+        } else {
+            System.out.println(id + "번 명언은 존재하지 않습니다.");
         }
     }
 
     // 명언 수정
-    private void updateById(String command, Scanner scanner) {
-        int id = extractId(command); // ID 추출
+    private void update(String command) {
+        int id = parseId(command);
+        if (id == -1) return;
 
-        if (id == -1) return; // 잘못된 ID일 경우 처리 중지
+        WiseSaying wiseSaying = service.findById(id);
+        if (wiseSaying == null) {
+            System.out.printf(id + "번 명언은 존재하지 않습니다.");
+            return;
+        }
 
-        String newWiseSaying;
-        String newAuthor;
+        System.out.println("명언(기존) : " + wiseSaying.getContent());
+        System.out.print("명언 : ");
+        String newContent = sc.nextLine().trim();
 
-        try {
-            // 1. WiseSaying 객체를 ID로 가져오기
-            WiseSaying wiseSaying = wiseSayingService.findByID(id);
+        System.out.println("작가(기존) : " + wiseSaying.getAuthor());
+        System.out.print("작가 : ");
+        String newAuthor = sc.nextLine().trim();
 
-            // 2. 기존 데이터 출력
-            System.out.println("명언(기존): " + wiseSaying.getWiseSaying());
-            System.out.print("명언 : ");
-            newWiseSaying = scanner.nextLine();
+        if (checkValid(newContent, newAuthor)) { return; }
 
-            System.out.println("작가(기존): " + wiseSaying.getAuthor());
-            System.out.print("작가: ");
-            newAuthor = scanner.nextLine();
-
-            // 3. 유효성 체크
-            if (newWiseSaying.trim().isEmpty() || newAuthor.trim().isEmpty()) {
-                System.out.println("명언 또는 작가 이름는 비어있을 수 없습니다");
-                return;
-            }
-
-            // 4. 수정된 정보로 업데이트
-            if(wiseSayingService.updateById(id, newWiseSaying, newAuthor)){
-                System.out.println(id + "번 명언이 수정되었습니다.");
-            } else {
-                System.out.println(id + "번 명언은 존재하지 않습니다.");
-            }
-        } catch (Exception e) {
-            System.err.println("명언 수정 중 오류 발생: " + e.getMessage());
+        if(service.update(id, newContent, newAuthor)){
+            System.out.println(id + "번 명언이 수정되었습니다.");
+        } else {
+            System.out.println(id + "번 명언은 존재하지 않습니다.");
         }
     }
 
-    // data.json 메시지 반환
     private void build() {
-        try{
-            String resultMessage = wiseSayingService.build();
-            System.out.println(resultMessage);
-        } catch (Exception e) {
-            System.out.println("빌드 중 오류 발생: " + e.getMessage());
+        if (service.build()){
+            System.out.println("data.json 파일의 내용이 갱신되었습니다.");
         }
     }
 
-    // 명령 판별
-    private String parseCommand(String command){
-        if(command.startsWith("삭제?id=")) return "삭제";
-        if(command.startsWith("수정?id=")) return "수정";
-        return command; // 단일 명령어 반환
-    }
-
-    // ID 추출
-    private int extractId(String command){
+    private int parseId(String command) {
         String[] parts = command.split("=");
-
-        try {
-            return Integer.parseInt(parts[1]); // ID가 있으면 그 값을 반환
-        } catch (Exception e) {
-            System.out.println("잘못된 ID 형식입니다.");
+        if (parts.length < 2) {
+            System.out.println("잘못된 명령어 형식입니다.");
             return -1;
         }
+        return Integer.parseInt(parts[1]);
+    }
+
+    private boolean checkValid(String content, String author){
+        if(content.isEmpty() || author.isEmpty()){
+            System.out.println("작가나 명언이 비어있을 수는 없습니다.");
+            return true;
+        }
+        return false;
     }
 
 } // end of Controller
