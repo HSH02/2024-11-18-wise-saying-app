@@ -69,6 +69,24 @@ public class WiseSayingTestInput {
             .create()
             .generateString();
 
+    public static final String INPUT_PAGING_DATA = TestScenarioInput.builder()
+            .add("명언 1", "작자미상 1")
+            .add("명언 2", "작자미상 2")
+            .add("명언 3", "작자미상 3")
+            .add("명언 4", "작자미상 4")
+            .add("명언 5", "작자미상 5")
+            .add("명언 6", "작자미상 6")
+            .add("명언 7", "작자미상 7")
+            .add("명언 8", "작자미상 8")
+            .add("명언 9", "작자미상 9")
+            .add("명언 10", "작자미상 10")
+            .list() // 기본 페이지 목록 조회
+            .list("2") // 2페이지 목록 조회
+            .build()
+            .create()
+            .generateString();
+
+
     // 테스트 시나리오를 위한 입력 생성 메서드
     public static class TestScenarioInput {
         private final List<String> commands;
@@ -110,8 +128,18 @@ public class WiseSayingTestInput {
                 return this;
             }
 
+            public ScenarioBuilder list(String page, String keywordType, String keyword) {
+                commands.add("목록?keywordType=" + keywordType + "&keyword=" + keyword + "&page=" + page);
+                return this;
+            }
+
             public ScenarioBuilder list(String keywordType, String keyword) {
                 commands.add("목록?keywordType=" + keywordType + "&keyword=" + keyword);
+                return this;
+            }
+
+            public ScenarioBuilder list(String page) {
+                commands.add("목록?page=" + page);
                 return this;
             }
 

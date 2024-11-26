@@ -12,8 +12,6 @@
      * 명언을 파일 시스템에 JSON 형식으로 관리하는 Repository 클래스
      */
     public class WiseSayingRepository {
-        // 한 페이지 당 표시할 항목 수
-        private static final int PAGE_SIZE = 5;
 
         // 파일 경로 관련 상수
         private static final String RUN_PATH = "src/main/resources/db/wiseSaying/";
@@ -84,8 +82,8 @@
             WiseSaying wiseSaying = new WiseSaying(newId, content, author);
 
             try {
-                Path filePath = baseDirectory.resolve(newId + ".json"); // id.json 경로 생성
-                writeWiseSayingToFile(wiseSaying, filePath);
+                Path filePath = baseDirectory.resolve(newId + ".json");   // id.json 경로 생성
+                writeWiseSayingToFile(wiseSaying, filePath);                     // 파일 저장
                 Files.writeString(Paths.get(lastIdFile), String.valueOf(newId)); // 새 id 값을 lastIdFile 경로에 문자열로 저장
                 return newId;
             } catch (IOException e) {
@@ -101,32 +99,8 @@
          */
         private void writeWiseSayingToFile(WiseSaying wiseSaying, Path path) throws IOException {
             try (BufferedWriter writer = Files.newBufferedWriter(path)) { // Files.newBufferedWriter(path)) -  지정한 경로에 대해 BufferedWriter 생성
-                writer.write(toJson(wiseSaying));
-            } // TO-DO 띄어쓰기 자동으로 닫혀짐
-        }
-
-        /**
-         * WiseSaying 객체를 JSON 문자열로 반환
-         * @param   wiseSaying 객체
-         * @return  JSON 문자열
-         */
-        private String toJson(WiseSaying wiseSaying) {
-            return  "{\n" +
-                    "  \"id\": " + wiseSaying.getId() + ",\n" +
-                    "  \"wiseSaying\": \"" + escapeJson(wiseSaying.getContent()) + "\",\n" +
-                    "  \"author\": \"" + escapeJson(wiseSaying.getAuthor()) + "\"\n" +
-                    "}";
-        }
-
-        private String escapeJson(String input) {
-            return input
-                    .replace("\\", "\\\\")
-                    .replace("\"", "\\\"")
-                    .replace("\b", "\\b")
-                    .replace("\f", "\\f")
-                    .replace("\n", "\\n")
-                    .replace("\r", "\\r")
-                    .replace("\t", "\\t");
+                writer.write((wiseSaying.toJson()));
+            }
         }
 
         /**
@@ -173,33 +147,10 @@
                 while ((line = reader.readLine()) != null) {
                     json.append(line);
                 }
-                return Optional.of(parseJson(json.toString())); // wiseSaying 객체를 of 로 감아 반환
+                return Optional.of(WiseSaying.toJsonList(json.toString())); // wiseSaying 객체를 of 로 감아 반환
             } catch (IOException e) {
                 return Optional.empty();
             }
-        }
-
-        /**
-         * JSON 문자열을 WiseSaying 객체로 파싱
-         * @param json - JSON 문자열
-         * @return WiseSaying 객체
-         */
-        private WiseSaying parseJson(String json) {
-            json = json.trim().replaceAll("[{}\n\\s]", "");
-            Map<String, String> values = new HashMap<>();
-
-            for (String pair : json.split(",")) {
-                String[] keyValue = pair.split(":");
-                String key = keyValue[0].replaceAll("\"", "").trim();
-                String value = keyValue[1].replaceAll("\"", "").trim();
-                values.put(key, value);
-            }
-
-            return new WiseSaying(
-                    Integer.parseInt(values.get("id")),
-                    values.get("wiseSaying"),
-                    values.get("author")
-            );
         }
 
         /**
@@ -250,12 +201,12 @@
                 try(BufferedWriter writer = Files.newBufferedWriter(dataFile)) {
                     writer.write("[\n");
                     for (int i = 0; i < allWiseSayings.size(); i++) {
-                        writer.write(toJson(allWiseSayings.get(i)));
+                        writer.write((allWiseSayings.get(i).toJson()));
                         if (i < allWiseSayings.size()- 1 ){
                             writer.write(",\n");
                         }
                     }
-                    writer.write("[\n");
+                    writer.write("\n]\n");
                 }
                 return true;
             } catch (IOException e){
@@ -290,12 +241,12 @@
          * 전체 페이지 수 계산
          * @return 총 페이지 수
          */
-        public int getTotalPages() {
+        public int getTotalPages(int pageSize) {
             try(Stream<Path> paths = Files.list(baseDirectory)) {
                 long totalItems = paths // count 반환 타입 및 Stream 요소 개수로 long 선언
                                         .filter(path -> path.getFileName().toString().matches(JSON_FILE_PATTERN))
                                         .count();
-                        return (int) Math.ceil((double)(totalItems / PAGE_SIZE));
+                        return (int) Math.ceil((double)(totalItems / pageSize));
             } catch (IOException e) {
                 throw new RuntimeException("페이지 수 계산 실패", e);
             }

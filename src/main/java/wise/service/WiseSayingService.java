@@ -13,7 +13,9 @@ public class WiseSayingService {
 
     // Repository 객체
     private final WiseSayingRepository repository;
-//    private static int lastId; // 현재 마지막 ID
+
+    // 한 페이지 당 표시할 항목 수
+    private static final int PAGE_SIZE = 5;
 
     // 생성자
     public WiseSayingService(WiseSayingRepository repository) {
@@ -36,8 +38,22 @@ public class WiseSayingService {
     }
 
     // 모든 명언 목록 반환
-    public List<WiseSaying> findAll(){
-        return repository.findAll();
+    public List<WiseSaying> findAll(int page, String keywordType, String keyword){
+        List<WiseSaying> filteredList = repository.findAll();
+        filteredList.sort((a, b) -> Integer.compare(b.getId(), a.getId())); // 내림차순 정렬
+
+        if(filteredList.isEmpty()) return filteredList;
+
+        int totalItems = filteredList.size();
+        int totalPages = getTotalPages();
+
+        if(page < 1) page = 1;
+        if(page > totalPages) page = totalPages;
+
+        int startIndex = (page - 1) * PAGE_SIZE;
+        int endIndex = Math.min(startIndex + PAGE_SIZE, totalItems);
+
+        return filteredList.subList(startIndex, endIndex);
     }
 
     // ID로 명언 삭제
@@ -56,6 +72,6 @@ public class WiseSayingService {
     }
 
     public int getTotalPages() {
-        return repository.getTotalPages();
+        return repository.getTotalPages(PAGE_SIZE);
     }
 }

@@ -79,8 +79,8 @@ public class WiseSayingController {
                 }
             }
         }
-//
-        List<WiseSaying> wiseSayings = service.findAll();
+
+        List<WiseSaying> wiseSayings = service.findAll(page, keywordType, keyword);
         System.out.println("번호 / 작가 / 명언");
         System.out.println("----------------------");
 

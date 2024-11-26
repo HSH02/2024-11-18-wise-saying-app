@@ -173,4 +173,17 @@ class WiseSayingControllerTest {
         );
     }
 
+//    @DisplayName("페이징 데이터 추가")
+//    @Test
+//    void testAddPagingData() {
+//        // given
+//        WiseSayingController controller = new WiseSayingController(wiseSayingService, setInput(INPUT_PAGING_DATA));
+//
+//        // when
+//        controller.run();
+//
+//        // then
+//        String output = outContent.toString(); // 캡처된 내용을 문자열로 변환
+//    }
+
 }
