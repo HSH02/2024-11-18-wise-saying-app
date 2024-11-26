@@ -42,6 +42,8 @@ public class WiseSayingService {
         List<WiseSaying> filteredList = repository.findAll();
         filteredList.sort((a, b) -> Integer.compare(b.getId(), a.getId())); // 내림차순 정렬
 
+        
+
         if(filteredList.isEmpty()) return filteredList;
 
         int totalItems = filteredList.size();
