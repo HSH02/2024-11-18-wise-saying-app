@@ -49,8 +49,11 @@ public class WiseSayingController {
     private void add() {
         System.out.print("명언 : ");
         String content = sc.nextLine();
+        System.out.println(content);
+
         System.out.print("작가 : ");
         String author = sc.nextLine();
+        System.out.println(author);
 
         if (checkValid(content, author)) { return; }
 
@@ -123,10 +126,12 @@ public class WiseSayingController {
         System.out.println("명언(기존) : " + wiseSaying.getContent());
         System.out.print("명언 : ");
         String newContent = sc.nextLine().trim();
+        System.out.println(newContent);
 
         System.out.println("작가(기존) : " + wiseSaying.getAuthor());
         System.out.print("작가 : ");
         String newAuthor = sc.nextLine().trim();
+        System.out.println(newAuthor);
 
         if (checkValid(newContent, newAuthor)) { return; }
 

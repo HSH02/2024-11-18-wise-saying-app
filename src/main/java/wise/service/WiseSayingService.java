@@ -3,7 +3,9 @@ package wise.service;
 import wise.model.WiseSaying;
 import wise.repository.WiseSayingRepository;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /*
  * 역할 : 순수 비지니스 로직
@@ -42,7 +44,22 @@ public class WiseSayingService {
         List<WiseSaying> filteredList = repository.findAll();
         filteredList.sort((a, b) -> Integer.compare(b.getId(), a.getId())); // 내림차순 정렬
 
-        
+        // 검색
+        if (keywordType != null && keyword != null) {
+            switch (keywordType) {
+                case "author":
+                    filteredList = filteredList.stream()
+                            .filter(w -> w.getAuthor().contains(keyword))
+                            .collect(Collectors.toList());
+                    break;
+
+                case "content":
+                    filteredList = filteredList.stream()
+                            .filter(w ->  w.getContent().contains(keyword))
+                            .collect(Collectors.toList());
+                    break;
+            }
+        }
 
         if(filteredList.isEmpty()) return filteredList;
 

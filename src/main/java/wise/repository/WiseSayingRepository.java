@@ -81,12 +81,12 @@ public class WiseSayingRepository {
             throw new RuntimeException("findAll 메서드 실행 실패");
         }
 
-        return Arrays.stream(files)
-                .map(this::readWiseSaying)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .sorted(Comparator.comparing(WiseSaying::getId))
-                .collect(Collectors.toList());
+        return Arrays.stream(files)                                 // stream 선언
+                .map(this::readWiseSaying)                          // readWiseSaying 반복
+                .filter(Optional::isPresent)                        // null 필터링
+                .map(Optional::get)                                 // 객체 반환
+                .sorted(Comparator.comparing(WiseSaying::getId))    // ID 기준 정렬
+                .collect(Collectors.toList());                      // List 반환
     }
 
     public WiseSaying findByID(int id) {

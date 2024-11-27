@@ -7,12 +7,15 @@ public class WiseSayingTestInput {
 
     public static final String INPUT_ADD = TestScenarioInput.builder()
             .add("Wise 1", "Author 1")
+            .add("Wise 2", "Author 2")
+            .add("Wise 3", "Author 3")
             .create()
             .generateString();
 
     public static final String INPUT_FIND_ALL = TestScenarioInput.builder()
             .add("Wise 1", "Author 1")
             .add("Wise 2", "Author 2")
+            .add("Wise 3", "Author 3")
             .list()
             .create()
             .generateString();
